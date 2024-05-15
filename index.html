@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Tutorial</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+    h1, h2 {
+        color: #333;
+    }
+    p {
+        margin: 20px 0;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Electric Vehicle Population</h1>
+    <p>Collaborators: Brian Mach, Nathan Ong</p>
+    <h2>Introduction</h2>
+    <p>
+        The main goal of this project is to guide you through the comprehensive pipeline of data science. The pipeline goes from Data Collection, Data Processing, Exploratory Analysis and Data Visualization, Model: Analysis, Hypothesis, and Machine Learning (ML), and Interpretation: Insight and Policy Decision. With this pipeline, we will be specifically focusing on the field of electric vehicles (EVs). As the concerns of the environment continue to grow and the shift towards sustainable energy gains momentum, electric vehicles have been a very popular choice for reducing carbon emissions. With this in mind, we will do a deep dive into data provided by Washington State Department of Licensing (DOL) which details the population of Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs) that are currently registered in the state. 
+    </p>
+
+    <p>
+        So why is this important? This growth in electric vehicle adoption is not just a measure of technological advancement but it is also an indicator of shifting consumer preferences and policy effectiveness in addressing climate change. We can uncover patterns in EV adoption across different regions and time periods by analyzing the dataset. 
+    </p>
+
+    <p>
+        Through this tutorial, we will explore various data science techniques to parse, manage, and analyze this dataset and we aim to provide actionable insights on the current state and potential future of electric vehicle usage in Washington State. By focusing on this part of sustainability, we also hope to contribute to the broader conversation on environmental policy and sustainable development.
+    </p>
+
+    <p>
+        Here is the Data Science Lifecycle:
+    </p>
+
+    <ol>
+        <li>Data Collection</li>
+        <li>Data Processing</li>
+        <li>Exploratory Analysis & Data Visualization</li>
+        <li>Model: Analysis, Hypothesis Testing, & ML</li>
+        <li>Interpretation: Insight & Policy Decision</li>
+    </ol>
+
+    <h2>Data Collection</h2>
+    <p>
+        The first part of the data science lifecycle is data collection. In our project, we focused on gathering relevant information about the population of electric vehicles. We obtained our primary dataset, “Electruc_Vehicle_Population_Data.csv,” from the Department of Licensing (DOL) in Washington State and this dataset provides us comprehensive details on electric vehicles, including their make, model, electric range, and many other attributes. 
+    </p>
+    <p>
+        During this project, we will use Python as our primary language and Jupiter Notebook to develop this project. To learn more about Jupiter notebooks, click here to read about it. We will also be using the following imports. 
+    </p>
+    <pre><code class="language-python">
+        # These are the standard Data Science Python Libraries
+        import numpy as np
+        import pandas as pd
+        import sklearn
+        from sklearn import linear_model
+
+        # These are the HTTP requests of Web Pages from Python Libraries 
+        import requests
+        from bs4 import BeautifulSoup
+
+        # Dictionary Module
+        from collections import defaultdict
+
+        # Python Libraries for graphing/visuals
+        import matplotlib.pyplot as plt
+        import statsmodels.api
+        import statsmodels.formula.api as sm
+        import seaborn
+        import folium
+    </code></pre>
+
+
+    <p>
+        We will also be using these two important libraries: Pandas and NumPy. Pandas is a tool that allows us to manipulate data easily and it allows us to transform data easily because of its extensive array of tools. NumPy is able to perform computations on large datasets and it offers an efficient way to store and manipulate information. 
+    </p>
+
+    <h2>Data Processing</h2>
+    <p>
+        The second part of the Data Science Lifecycle is Data Processing, where we will perform actions with our data. First, we will load the dataset using the pandas library and read the contents of the CSV file into a DataFrame for further processing.
+    </p>
+
+    <pre><code class="language-python">
+        # Load our csv file, Electric_Vehicle_Population_Data.csv
+        file_path = 'Electric_Vehicle_Population_Data.csv'
+        data_of_ev = pd.read_csv(file_path)
+    </code></pre>
+
+    <p>
+        Data can oftentimes become very messy so we need to clean up the data. One example of data being messy is the fact that there can be missing values in the dataset. We can handle the missing values by dropping rows that contain missing values. 
+    </p>
+
+    <pre><code class="language-python">
+        # Rows with missing values will be dropped
+        data_of_ev_cleaned = data_of_ev.dropna()
+    </code></pre>
+
+    <p>
+        For columns that must be integers, such as ‘Model Year’, we should ensure that column is properly converted into an integer.
+    </p>
+
+    <pre><code class="language-python">
+        # Model Year is a column that should be converted into an integer
+        data_of_ev_cleaned['Model Year'] = data_of_ev_cleaned['Model Year'].astype(int)
+    </code></pre>
+
+    <p>
+        Once we clean the data, we will store this into a new csv file so that we can access a csv file with cleaned data. With clean data, we can perform various analyses in order to gain insights into the electric vehicle population. 
+    </p>
+
+    <pre><code class="language-python">
+        # With this newly cleaned data, we can store it into a new csv file to use later
+        data_of_ev_cleaned.to_csv('Electric_Vehicle_Population_Data_Cleaned.csv', index=False)
+    </code></pre>
+
+    <p>
+        One way we can perform an analysis is to generate summary statistics for the numerical columns in the dataset. This will give us an overview of the data. We can also count the number of vehicles by make in order to see which manufacturers have the most vehicles registered. Another analysis that we can do is counting the number of vehicles for each type of electric vehicle, such as Battery Electric Vehicle (BEV). Finally, we can calculate the average electric range for each vehicle make. We do this in order to understand which manufacturers produce vehicles with longer ranges.  
+    </p>
+
+    <pre><code class="language-python">
+        # Now we can get a summary of the statistics
+        summary_of_stats = data_of_ev_cleaned.describe()
+
+        # Counting the number of vehicles based on Make
+        make_counts = data_of_ev_cleaned['Make'].value_counts()
+
+        # This is the number of vehicles for each type of electric vehicle
+        ev_type_counts = data_of_ev_cleaned['Electric Vehicle Type'].value_counts()
+
+        # This is the average range by Make
+        avg_range_by_make = data_of_ev_cleaned.groupby('Make')['Electric Range'].mean()
+
+        # Here are the results
+        (summary_of_stats, make_counts, ev_type_counts, avg_range_by_make)
+    </code></pre>
+
+    <p>
+        Here are the results.
+    </p>
+
+    <pre>
+        (         Postal Code     Model Year  Electric Range      Base MSRP  \
+        count  181055.000000  181055.000000   181055.000000  181055.000000   
+        mean    98260.619331    2020.583342       57.809969    1038.141173   
+        std       303.618629       2.991069       91.387237    8220.159471   
+        min     98001.000000    1997.000000        0.000000       0.000000   
+        25%     98052.000000    2019.000000        0.000000       0.000000   
+        50%     98122.000000    2022.000000        0.000000       0.000000   
+        75%     98371.000000    2023.000000       75.000000       0.000000   
+        max     99403.000000    2024.000000      337.000000  845000.000000   
+        
+                Legislative District  DOL Vehicle ID  2020 Census Tract  
+        count         181055.000000    1.810550e+05       1.810550e+05  
+        mean              29.107183    2.214370e+08       5.303982e+10  
+        std               14.892453    7.528927e+07       1.621873e+07  
+        min                1.000000    4.385000e+03       5.300195e+10  
+        25%               18.000000    1.830801e+08       5.303301e+10  
+        50%               33.000000    2.290973e+08       5.303303e+10  
+        75%               42.000000    2.561379e+08       5.305307e+10  
+        max               49.000000    4.792548e+08       5.307794e+10  ,
+        Make
+        TESLA                   80627
+        NISSAN                  14024
+        CHEVROLET               13838
+        FORD                     9503
+        BMW                      7666
+        KIA                      7632
+        TOYOTA                   6485
+        VOLKSWAGEN               5153
+        JEEP                     4678
+        HYUNDAI                  4552
+        RIVIAN                   4419
+        VOLVO                    4278
+        AUDI                     3729
+        CHRYSLER                 3039
+        MERCEDES-BENZ            1646
+        PORSCHE                  1157
+        MITSUBISHI                979
+        MINI                      925
+        POLESTAR                  894
+        SUBARU                    837
+        HONDA                     834
+        FIAT                      783
+        DODGE                     607
+        MAZDA                     506
+        CADILLAC                  432
+        LEXUS                     398
+        SMART                     269
+        LINCOLN                   269
+        LUCID                     238
+        JAGUAR                    236
+        GENESIS                   189
+        FISKER                    111
+        LAND ROVER                 57
+        ALFA ROMEO                 42
+        AZURE DYNAMICS              8
+        TH!NK                       5
+        GMC                         3
+        BENTLEY                     3
+        WHEEGO ELECTRIC CARS        3
+        ROLLS ROYCE                 1
+        Name: count, dtype: int64,
+        Electric Vehicle Type
+        Battery Electric Vehicle (BEV)            141705
+        Plug-in Hybrid Electric Vehicle (PHEV)     39350
+        Name: count, dtype: int64,
+        Make
+        ALFA ROMEO               33.000000
+        AUDI                     49.500670
+        AZURE DYNAMICS           56.000000
+        BENTLEY                  19.666667
+        BMW                      34.222150
+        CADILLAC                  7.365741
+        CHEVROLET                94.790071
+        CHRYSLER                 32.207963
+        DODGE                    32.000000
+        FIAT                     85.632184
+        FISKER                    2.972973
+        FORD                     10.387983
+        GENESIS                   0.000000
+        GMC                       0.000000
+        HONDA                    46.206235
+        HYUNDAI                  19.067223
+        JAGUAR                  204.254237
+        JEEP                     22.352074
+        KIA                      43.752621
+        LAND ROVER               25.596491
+        LEXUS                    18.665829
+        LINCOLN                  23.472119
+        LUCID                     0.000000
+        MAZDA                    25.743083
+        MERCEDES-BENZ             9.254557
+        MINI                     17.697297
+        MITSUBISHI               30.875383
+        NISSAN                   79.995294
+        POLESTAR                 37.269575
+        PORSCHE                  44.472774
+        RIVIAN                    0.000000
+        ROLLS ROYCE               0.000000
+        SMART                    62.304833
+        SUBARU                    1.320191
+        TESLA                    75.957632
+        TH!NK                   100.000000
+        TOYOTA                   28.222205
+        VOLKSWAGEN               22.296138
+        VOLVO                    16.398083
+        WHEEGO ELECTRIC CARS    100.000000
+        Name: Electric Range, dtype: float64)
+    </pre>
+
+
+    <h2>Exploratory Analysis & Data Visualization</h2>
+    <p>
+        The third part of the Data Science Lifecycle is Visualizing Data and Analysis. When you are dealing with data, sometimes it is not helpful to just look at columns and rows of data. It helps a lot when you can see a good visual of the data, so let us do that.
+    </p>
+    <p>
+        With the code below, we are able to graph the number of electric vehicles by their make and it provides us a clear view of which manufacturers have the most vehicles registered in the dataset. By analyzing it, we can see that Tesla leads by a significant margin, followed by Nissan, Chevrolet, and Ford, which indicates Tesla’s dominance in the electric vehicle market within the dataset. 
+    </p>
+
+    <pre><code class="language-python">
+        # Plotting the number of vehicles by Make
+        plt.figure(figsize=(12, 8))
+        seaborn.barplot(x=make_counts.index, y=make_counts.values)
+        plt.xticks(rotation=90)
+        plt.xlabel('Make')
+        plt.ylabel('Number of Vehicles')
+        plt.title('Number of Vehicles by Make')
+        plt.show()
+    </code></pre>
+    <img src="Num_Vehicles_By_Make.png" alt="Number of Vehicles by Make">
+
+    <p>
+        This pie chart below shows the distribution of different types of electric vehicles in the dataset, specifically Battery Electric Vehicles (BEV) and Plug-in Hybrid Electric Vehicles (PHEV). By looking at this, we can see that the majority of vehicles are BEVs with a 78.3% majority, while PHEVs make up the remaining 21.7%.  This indicates a strong market trend towards zero-emission vehicles, which aids in reducing greenhouse gas emissions. 
+    </p>
+    <pre><code class="language-python">
+        # Plotting the distribution of electric vehicle types
+        plt.figure(figsize=(8, 8))
+        ev_type_counts.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=['#ff9999','#66b3ff'])
+        plt.ylabel('')
+        plt.title('Distribution of Electric Vehicle Types')
+        plt.show()
+    </code></pre>
+    <img src="Distribution_of_Electric_Vehicle_Types.png" alt="Number of Vehicles by Make">
+
+    <p>
+        Finally, the bar chart below shows us the average electric range for each vehicle make and it is a critical factor for consumers that are considering buying electric vehicles. Jaguar has the highest average electric range and it is followed by Tesla and other manufacturers. It is important to understand these variations because it highlights the performance capabilities of different EV brands and as a result, brings guidance to consumer choices and influences market competition. 
+    </p>
+    <pre><code class="language-python">
+        # Plotting the average electric range by Make
+        plt.figure(figsize=(12, 8))
+        seaborn.barplot(x=avg_range_by_make.index, y=avg_range_by_make.values, palette='coolwarm')
+        plt.xticks(rotation=90)
+        plt.xlabel('Make')
+        plt.ylabel('Average Electric Range (miles)')
+        plt.title('Average Electric Range by Make')
+        plt.show()
+    </code></pre>
+    <img src="Average_Electric_Range.png" alt="Number of Vehicles by Make">
+
+    <h2>Model: Analysis, Hypothesis Testing, & ML</h2>
+
+</div>
+</body>
+</html>
