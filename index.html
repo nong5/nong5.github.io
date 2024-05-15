@@ -59,10 +59,15 @@
 
     <h2>Data Collection</h2>
     <p>
-        The first part of the data science lifecycle is data collection. In our project, we focused on gathering relevant information about the population of electric vehicles. We obtained our primary dataset, “Electruc_Vehicle_Population_Data.csv,” from the Department of Licensing (DOL) in Washington State and this dataset provides us comprehensive details on electric vehicles, including their make, model, electric range, and many other attributes. 
+        The first part of the data science lifecycle is data collection. In our project, we will focus on 
+        gathering relevant information about the population of electric vehicles. Our primary dataset will be the 
+        “Electric_Vehicle_Population_Data.csv” from the Department of Licensing (DOL) in Washington State and this 
+        dataset provides us comprehensive details on electric vehicles, including their make, model, electric range, 
+        and many other attributes.
     </p>
     <p>
-        During this project, we will use Python as our primary language and Jupiter Notebook to develop this project. To learn more about Jupiter notebooks, click here to read about it. We will also be using the following imports. 
+        During this project, we will use <a href="https://docs.python.org/3/library/index.html">Python</a> as our primary language and Jupiter Notebook to develop this project. 
+        To learn more about Jupiter notebooks, click <a href="https://docs.jupyter.org/en/latest/">here</a> to read about it. We will also be using the following imports. 
     </p>
     <pre><code class="language-python">
         # These are the standard Data Science Python Libraries
@@ -88,7 +93,7 @@
 
 
     <p>
-        We will also be using these two important libraries: Pandas and NumPy. Pandas is a tool that allows us to manipulate data easily and it allows us to transform data easily because of its extensive array of tools. NumPy is able to perform computations on large datasets and it offers an efficient way to store and manipulate information. 
+        We will also be using these two important libraries: <a href="https://pandas.pydata.org/docs/user_guide/index.html#user-guide">Pandas</a> and <a href="https://numpy.org/devdocs/user/index.html#user">NumPy</a>. Pandas is a tool that allows us to manipulate data easily and it allows us to transform data easily because of its extensive array of tools. NumPy is able to perform computations on large datasets and it offers an efficient way to store and manipulate information. 
     </p>
 
     <h2>Data Processing</h2>
@@ -314,7 +319,92 @@
     <img src="Average_Electric_Range.png" alt="Number of Vehicles by Make">
 
     <h2>Model: Analysis, Hypothesis Testing, & ML</h2>
+    <p>
+        Now we will focus on using the linear regression modeling technique in order to obtain a predictive model of our data.
+        This modeling technique is important because it allows us to predict how the data will look in the future or any data that's outside the scope of our dataset.
+        For our linear regression model, we will predict how the electric vehicle population will change over the next few years. We will use a machine learning algorithm to create a model using linear regression.<br><br>
+        Get the data from the dataset and sort it by year:
+    </p>
+    <pre><code class="language-python">
+        file_path = 'Electric_Vehicle_Population_Data_Cleaned.csv'
+        data_of_ev = pd.read_csv(file_path)
 
+        # Summarizing the data by year to get the number of electric vehicles per year
+        ev_by_year = data_of_ev.groupby('Model Year').size().reset_index(name='Number of Vehicles')
+    </code></pre>
+
+    <p>
+        Now we must set the axis for our linear regression plot. We will set the x-axis to be the "Model Year" and the y-axis to be the "Number of Vehicles".
+    </p>
+    <pre><code class="language-python">
+        # organizing the data by model year and number of vehicles to get x and y axis
+        X = ev_by_year[['Model Year']]
+        Y = ev_by_year['Number of Vehicles']
+    </code></pre>
+
+    <p>
+        Next, we will split the data into training and testing sets and create a linear regression model.
+    </p>
+    <pre><code class="language-python">
+        # Splitting the data into training/testing sets
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
+
+        # Creating a linear regression model
+        model = LinearRegression()
+    </code></pre>
+
+    <p>
+        We will use the training sets to train the linear regression model and make predictions from the testing set.
+    </p>
+    <pre><code class="language-python">
+        # Training the model using the training sets above
+        model.fit(X_train, Y_train)
+
+        # Making predictions using the testing set
+        Y_pred = model.predict(X_test)
+    </code></pre>
+
+    <p>
+        In order to see the values in the model, we must print them.
+    </p>
+    <pre><code class="language-python">
+        print('Ordinary Least Squares (OLS)')
+        print('Coefficients:', model.coef_[0])
+        print('Intercept:', model.intercept_)
+        print('Mean squared error: %.2f' % mean_squared_error(Y_test, Y_pred))
+        print('Coefficient of determination (R^2): %.2f' % r2_score(Y_test, Y_pred))
+    </code></pre>
+
+    <p>
+        Finally, we will complete our linear regression model by plotting all of the values that we calculated above.
+    </p>
+    <pre><code class="language-python">
+        # Plotting the results
+        plt.figure(figsize=(10, 6))
+        seaborn.scatterplot(x='Model Year', y='Number of Vehicles', data=ev_by_year, color='black', 
+        label='Actual data')
+
+        plt.plot(X_test, Y_pred, color='blue', linewidth=2, label='Predicted regression line')
+        plt.xlabel('Model Year')
+        plt.ylabel('Number of Vehicles')
+        plt.title('Linear Regression: Number of Electric Vehicles Over Years')
+        plt.legend()
+        plt.show()
+    </code></pre>
+    <img src="Linear_Regression_Model.png" alt="Linear Regression: Number of Electric Vehicles Over Years">
+
+
+    <h2>Interpretation: Insight & Policy Decision</h2>
+    <p>
+        In this part of the cycle, we will utilize our data analysis to draw meaningful conclusions and make informed inferences. Based on our observations from our model and all the information we have gathered so far, we can conclude the following:<br><br>
+        There has been a significant growth in electric vehicle purchases and usage throughout the years. Our analysis demonstrates a consistent increase in the number of electric vehicles (EVs) in Washington State over the years. We can see this from the linear regression model from the previous part of the cycle. This indicates a strong and ongoing usage of electric vehicles. This trend is expected to continue, suggesting a positive outlook for EV populations in the coming years.<br><br>
+        A notable portion of the electric vehicles in the dataset are marked as eligible for Clean Alternative Fuel Vehicle incentives. These incentives likely play a crucial role in encouraging the adoption of EVs. Policymakers should consider maintaining or enhancing these incentives to sustain and further stimulate the growth of the EV market.<br><br>
+        The data reveals some differences in electric range and popularity among different makes and models of EVs. For example, Tesla vehicles consistently produce higher electric ranges compared to other brands. Jaguar is also one of the top brands for electric vehicle ranges. Understanding these differences can help tailor policies and incentives to promote the adoption of high-performance models with longer ranges.<br><br>
+        The increasing adoption of EVs has significant environmental and economic benefits. The shift to electric vehicles reduces dependence on fossil fuels, lowers emissions, and contributes to improved air quality. Also, the transition to EVs can reduce fuel costs for consumers and potentially create new job opportunities in the EV industry, including manufacturing and maintenance sectors. These economic benefits are significant reasons why the population of EVs is consistently increasing.<br><br>
+        To support the growing EV population, there is a critical need for expanded infrastructure. There needs to be more accessible and widespread charging stations to account for the increase in EV usage. Policymakers should prioritize the development of a robust charging network to alleviate range anxiety and encourage more consumers to switch to electric vehicles. This will also improve the environment by reducing the amount of gas emissions.<br><br>
+        Overall, the insights gained from this analysis are valuable for decision-makers in Washington State. By understanding the trends and factors influencing EV usage, they can create policies that support and accelerate the transition to electric vehicles, which will contribute to environmental sustainability and economic growth.<br><br>
+        For future research, expanding the dataset to include more recent years and additional regions would provide a broader perspective. Investigating the impact of government policies, consumer preferences, and technological advancements on EV adoption could also provide deeper insights.
+    </p>
 </div>
 </body>
 </html>
